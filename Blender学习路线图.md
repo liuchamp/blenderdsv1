@@ -106,7 +106,8 @@
 - [ ] Loop Cut 的两次左键语义：第一次锁环、第二次定位，中间可右键居中
 - [ ] **支撑线（Support Loop）**：`Ctrl+R` 越靠近边缘 → SubD 后越硬；越远 → 越软
 - [ ] Subdivision Surface 修改器 + `Shade Auto Smooth`（对象右键）
-- [ ] 加权/普通法线、`Mark Sharp`、`Bevel Weight`（`Ctrl+Shift+E` 无关，用边属性面板）
+- [ ] 法线控制：`Shade Auto Smooth` + `Mark Sharp`（都在 `Ctrl+E` 边菜单里）
+- [ ] **Bevel Weight**（`Ctrl+E → Edge Bevel Weight`）：用一个修改器实现多种倒角宽度，硬表面核心技巧
 - [ ] 拓扑体检：三角面、N-gon、极点（pole）识别；`Mesh → Clean Up` 相关操作
 - [ ] LoopTools：Space / Circle / Flatten 解决「线不均匀」「圆不圆」
 
