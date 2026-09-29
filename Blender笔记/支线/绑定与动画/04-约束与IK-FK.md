@@ -66,9 +66,9 @@ Pose Mode 里骨头的颜色会告诉你它挂了什么（这是免费的自查�
 flowchart TD
     A["① Pose Mode 选中<b>末端骨</b>（如 lower_arm）"] --> B["② 加 Bone Constraint → Inverse Kinematics"]
     B --> C["③ Target 选 rig + target 骨（一般是单独的靶盘骨）"]
-    C --> D["④ 设 Chain Length<br/>小贴士：数量为参与解算的骨数"]
+    C --> D["④ 设 Chain Length<br/>含义：参与解算的骨数"]
     D --> E["⑤ 需要指定弯向 → 加 Pole Target 骨"]
-    E --> F["⑥ Pole Angle 调整投标的方位"]
+    E --> F["⑥ Pole Angle 调整极点的方位"]
     F --> G["⑦ 移动 target 骨验证：整条链跟着走，且弯曲方向正确"]
 ```
 
@@ -77,7 +77,7 @@ flowchart TD
 | **Chain Length** | 参与解算的骨数量。手臂一般 2（upper + lower）；链多算了会把潜力带入 Torso |
 | **Target** | Rig + 一根**不带 Deform** 的控制/目标骨 |
 | **Pole Target** | 一根标明「凸出方向」的骨（放在肘 / 膝的前侧或后侧） |
-| **Pole Angle** | 极点在约束平面上的角度；**翻转爆 singularities 时先调这里** |
+| **Pole Angle** | 极点在约束平面上的角度；**翻转 / 出现异常时先调这里** |
 | **Iterations** | 解算迭代次数；不够会抖，一般默认够用 |
 
 > 💡 **Pole Target 的直觉**：它像插在关节上的一面小旗，IK 会向旗的方向弯。所以旗放在「关节该凸出的那一侧」。
@@ -180,7 +180,7 @@ Spline IK                             沿曲线：尾巴 / 触手
 【IK 三件套】
 Chain Length  参与解算的骨数（手臂一般 2）
 Pole Target   指向「关节该凸出」那一侧的旗子骨
-Pole Angle    Pole 在平面上的角度 → 翻机型先调它
+Pole Angle    Pole 在平面上的角度 → 翻转时先调它
 ⚠️ target / pole 骨都要关 Deform
 
 【必须烘焙 ⭐】

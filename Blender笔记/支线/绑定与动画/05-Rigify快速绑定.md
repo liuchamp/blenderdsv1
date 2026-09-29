@@ -10,7 +10,7 @@
 ```mermaid
 flowchart LR
     A["你：调 metarig<br/>描述肢体位置与比例"] --> B["Generate Rig<br/>按 rig type 模板展开"]
-    B --> C["得到几百根骨的完整 rig<br/>含 IK/FK 切换 ·  LIMITU 护栏 · 控件形状 · 分层 UI"]
+    B --> C["得到几百根骨的完整 rig<br/>含 IK/FK 切换 · 约束护栏 · 控件形状 · 分层 UI"]
 ```
 
 手工搭一套能用的角色 rig 需要几小时到几天；Rigify 把它压缩成「摆 metarig + 按一个按钮」。代价是：**要按它的规矩来。**
@@ -35,7 +35,7 @@ flowchart TD
 
 | 步骤 | 关键点 | 常见失误 |
 | --- | --- | --- |
-| ③ 调 metarig | 骨 Our 位于肢体的**中心**，关节位置对准生理弯曲点 | 偷懒缩放整个 metarig 而不逐节对准，导致关节位置偏移 |
+| ③ 调 metarig | 骨要位于肢体的**中心**，关节位置对准生理弯曲点 | 偷懒缩放整个 metarig 而不逐节对准，导致关节位置偏移 |
 | ④ Generate | 在 **Armature 属性**里找 Rigify 面板 | 在 metarig 的对象模式外找了半天找不到按钮 |
 | ⑥ 绑定 | 选 mesh → 加选 **生成的 rig** → `Ctrl+P → Automatic Weights` | 选成了 metarig（metarig 只是模板，不该被绑定） |
 | ⑧ 导出 | glTF 勾 `Export Deformation Bones Only` | 不勾 → 导出几百根骨，引擎里灾难 |

@@ -11,7 +11,7 @@
 flowchart LR
     A["骨骼有局部坐标系"] --> B["Y 轴：Head → Tail 的方向"]
     A --> C["Roll：绕 Y 轴的旋转 → 决定 X/Z 指向"]
-    C --> D["① 约束 Nutzung：IK 平面 / Pole 方向"]
+    C --> D["① 约束解算：IK 平面 / Pole 方向"]
     C --> E["② 形变方向：关节往哪一侧弯"]
     C --> F["③ 对称：X-Axis Mirror 的镜像轴"]
 ```
@@ -38,7 +38,7 @@ flowchart LR
 ```mermaid
 flowchart TD
     Q{"什么时候用什么?"}
-    Q -->|"大部分 limbs / spine（一件事：正对着同一个方向）"| A["Ctrl+N → Global +X Axis<br/>一次把整条链 Roll 正 ⭐"]
+    Q -->|"大部分 limbs / spine（目标是朝向同一个方向）"| A["Ctrl+N → Global +X Axis<br/>一次把整条链 Roll 正 ⭐"]
     Q -->|"中间的几根骨要单独拧"| B["Ctrl+R 手动一点一点拧"]
     Q -->|"微调只想抹平 unwanted rotation"| C["Alt+R 先归零，再 Ctrl+N"]
     Q -->|"想把某个方向对齐 3D 光标"| D["先 Shift+S 把光标摆到该轴方向<br/>→ Ctrl+N → Cursor"]
@@ -85,7 +85,7 @@ flowchart TD
 
 ---
 
-## 四、对称工作流（做 bilaterial 资产的标准做法）
+## 四、对称工作流（做左右对称资产的标准做法）
 
 ```text
 【骨架】

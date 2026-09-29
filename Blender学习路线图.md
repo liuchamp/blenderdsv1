@@ -92,7 +92,7 @@
 
 **总计约 105–144 小时**（不含支线）。
 
-> 支线（按需选）：**绑定与动画** 8–12h ｜ **几何节点深入** 15–25h ｜ **程序化材质** 10–15h
+> 支线（按需选）：[**绑定与动画**](Blender笔记/支线/绑定与动画/笔记.md) 6–18h（道具最短路 ≈6–8h / 角色完整路 ≈14–18h） ｜ **几何节点深入** 15–25h ｜ **程序化材质** 10–15h
 
 ---
 
@@ -360,10 +360,17 @@ Compression (Draco): ON, level 6          ← 体积降 40–70%（需确认目�
 Animation: OFF（静态道具）
 ```
 
-#### FBX 导出预设 —— **骨骼动画资产用这个**
+#### FBX 导出预设 —— **只在目标端明确要求 FBX 时才用**（5.x 订正）
 
-静态道具优先 GLB；**带骨骼层级的角色/动画资产**用 FBX 更稳（5.0 重做了骨骼轴向处理）。
-导出时按需设 Forward / Up 轴向与缩放，其余同检查清单。
+⚠️ **本条已订正**（原文写的「骨骼动画资产用 FBX 更稳 + 5.0 重做了骨骼轴向处理」两条都不成立）：
+
+- **「5.0 重做了骨骼轴向处理」查无此事**。5.0 Release Notes 的 Animation & Rigging / Pipeline & I/O 两段都没有骨骼轴向相关条目。5.0 真正改的是 **FBX 新 C++ 导入器成为默认**（Python 版降级为 `FBX (Legacy)`）——那是**导入**侧，不是轴向问题。轴向差异**依然存在**：手册原话「FBX bones seem to be **-X** aligned, Blender's are **Y** aligned … imported bones in other applications will look wrong」，必须在导出面板手动配 `Primary / Secondary Bone Axis`。
+- **「骨骼动画用 FBX 更稳」不成立**。5.2 的 FBX **导出**仍走旧 Python add-on（`FBX (Legacy)`），手册明确列出缺失项：**`Vertex shape keys` 不写出**（FBX 格式支持，是这个导出器没做）、**Armature instances 不支持**、**Constraints 本身不写入**（只写烘焙结果）。
+- **→ 结论**：Godot / Unity / Bevy / Web **优先 GLB**；只有目标端明确要 FBX（UE5 部分流程、资产商店投稿）才走 FBX。**依赖形状键 / 表情 / morph target 的资产必须走 GLB。**
+
+FBX 导出时至少确认三处：`Add Leaf Bones` **关**、`Only Deform Bones` **开**、`Primary / Secondary Bone Axis` **配**。
+
+> 完整的格式选型对比、两端导出面板逐项说明、引擎验证清单，见支线 [**绑定与动画**](Blender笔记/支线/绑定与动画/笔记.md) 的第 [0 节订正](Blender笔记/支线/绑定与动画/笔记.md#0--先订正路线图里关于这条支线的六条说法要更新) 与 [08-骨骼动画导出-GLB与FBX](Blender笔记/支线/绑定与动画/08-骨骼动画导出-GLB与FBX.md)。
 
 #### 各引擎导入要点
 
