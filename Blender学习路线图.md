@@ -43,8 +43,10 @@
 | --- | --- |
 | 色彩管理管线重写（ACES 1.3/2.0、HDR、宽色域） | 老教程的「颜色发灰」解法可能已过时；你现在能直接用 ACES 视图变换 |
 | UI/主题系统重做（移除 300+ 主题选项） | 老教程里的界面截图、自定义主题可能对不上 |
-| UV 编辑器同步机制重构 | 4.x 那些「展完 UV 拓扑错位」的抱怨，5.x 好很多 |
-| 新增 Array 修改器的 **Scatter on Surface** | 表面散布物体（碎石、植被）不必全靠几何节点 |
+| UV 编辑器同步机制重构（官方叫 **UVerhaul**：同步选择**默认开启**且已修好） | 4.x 那些「展完 UV 拓扑错位」的抱怨，5.x 好很多；⚠️ 老教程教的「关掉 UV Sync 那个按钮」在 5.x **别照做** |
+| 布尔求解器 `Fast` 改名为 `Float` | Stage 1 笔记里写的 `Fast`，在 5.x 界面上显示成 `Float`，是同一个求解器 |
+| UV 编辑器新增算子 | `Arrange/Align Islands`、`Move on Axis`（`Numpad 8246`）、`Pack To → Custom Region`（`Ctrl+B` 设区域） |
+| 新增 6 个**基于几何节点**的修改器：**Array**（重写版）/ **Scatter on Surface** / Instance on Elements / Randomize Instances / Curve to Tube / Geometry Input | 表面散布物体（碎石、植被）不必全靠几何节点；阵列支持 Circle/Curve/随机化。⚠️ 旧 Array 保留为 **Array (Legacy)**，所以 5.2 里有两个 Array |
 | Cycles：Multiresolution 烘焙大幅增强（支持矢量位移、n-gon、只烘焙到选中图像） | 高模→低模烘焙链路更顺 |
 | 几何节点新增 SDF / Volume 节点 | 布尔和有机融合有新解法，但**入门阶段先别碰** |
 
@@ -68,7 +70,7 @@
 | **F2** | 快速补面，修洞必备 | Stage 0 |
 | **Auto Mirror** | 对称建模自动加 Mirror 修改器 | Stage 1 |
 | **Extra Objects** | 追加一批基础几何体 | 随时 |
-| **Import Images as Planes** | 导入参考图 | Stage 1 起 |
+| **Import Images as Planes** | 导入参考图 | Stage 1 起（**4.2 后已内置**，无需勾选，直接 `Shift+A → Image → Mesh Plane`） |
 | **Rigify** | 骨骼绑定生成器 | 支线（做角色才开） |
 
 > glTF 2.0 导入导出是**内置**的，不用装插件。
@@ -105,8 +107,8 @@
 - [ ] **Edge Slide `G G`**：拓扑不变，只重新分配空间（你笔记第 28 节已有）
 - [ ] Loop Cut 的两次左键语义：第一次锁环、第二次定位，中间可右键居中
 - [ ] **支撑线（Support Loop）**：`Ctrl+R` 越靠近边缘 → SubD 后越硬；越远 → 越软
-- [ ] Subdivision Surface 修改器 + `Shade Auto Smooth`（对象右键）
-- [ ] 法线控制：`Shade Auto Smooth` + `Mark Sharp`（都在 `Ctrl+E` 边菜单里）
+- [ ] Subdivision Surface 修改器 + ~~`Shade Auto Smooth`~~（4.1 已移除）→ **`Shade Smooth by Angle`**（对象右键）或 **Smooth by Angle 修改器**
+- [ ] 法线控制：~~`Shade Auto Smooth`~~ → **`Shade Smooth by Angle`** + `Mark Sharp`（都在 `Ctrl+E` 边菜单里）
 - [ ] **Bevel Weight**（`Ctrl+E → Edge Bevel Weight`）：用一个修改器实现多种倒角宽度，硬表面核心技巧
 - [ ] 拓扑体检：三角面、N-gon、极点（pole）识别；`Mesh → Clean Up` 相关操作
 - [ ] LoopTools：Space / Circle / Flatten 解决「线不均匀」「圆不圆」
@@ -138,13 +140,13 @@
 **一句话目标**：拿到一张参考图，能按流程做出比例正确、拓扑干净、可继续加工的道具。
 
 **必学清单**
-- [ ] **参考图设置**：`Import Images as Planes` 导入三视图 → 对齐 → 开 X-Ray
+- [ ] **参考图设置**：`Shift+A → Image → Mesh Plane`（4.2 起内置，不用勾插件）导入三视图 → 缩放到真实比例 → 开 In Front / X-Ray
 - [ ] **单位与真实尺寸**：`Scene Properties → Units`，用米；给物体设真实尺寸（油桶 0.6m 直径之类）
 - [ ] 修改器基础：Mirror、Solidify、Bevel（作为修改器而非 `Ctrl+B`）、Subdivision
 - [ ] Boolean（Bool Tool）+ **布尔后的清理**：这是硬表面最痛的一步
 - [ ] Bevel 策略：Width 与 Segments 分开想（你笔记第 33 节已懂），再补「按镜头距离定宽度」
 - [ ] 分离件 vs 一体件：什么时候该 `P → Separate`
-- [ ] 硬边处理：`Shade Auto Smooth` + `Mark Sharp` vs 加倒角
+- [ ] 硬边处理：~~`Shade Auto Smooth`~~（4.1 已移除）→ **`Shade Smooth by Angle`** 或 **Smooth by Angle 修改器** + `Mark Sharp`，对比「真加倒角」
 
 **练习项目**
 - **道具 #1：木箱**（入门）：Cube → Inset 木条面 → Extrude → Bevel → 加铁角件
@@ -166,7 +168,7 @@
 
 **常见坑**
 - ❌ 布尔完不清理 → 一堆三角面和 n-gon → UV 和烘焙全崩。**布尔只用来开洞，结构靠挤出**
-- ❌ Bevel 用在修改器上但没设 Limit Method → 该硬的地方被倒圆了（用 **Weight** 或 **Angle**）
+- ❌ Bevel 用在修改器上但没设 Limit Method → 默认 `None` 是**所有边都倒**，平面上的布线边也被倒、模型炸线（硬表面起手式：**Angle 30°–60°**）
 - ❌ 不做真实尺寸 → 进引擎后比例全乱
 
 ---
@@ -178,7 +180,8 @@
 **必学清单**
 - [ ] 修改器栈的顺序语义（Mirror 在 SubD 前还是后？）
 - [ ] Mirror 的正确用法（ clipping、merge、原点位置）
-- [ ] Array + **Scatter on Surface**（5.0 新增）做阵列与散布
+- [ ] **Array**（5.0 几何节点版 / **Legacy** 两套，参数完全不同）+ **Scatter on Surface**（5.0 新增的独立修改器）做阵列与散布
+- [ ] ⭐ **Realize Instances**：新 Array / Scatter 默认输出实例，要 Merge / Boolean / 导出成单一网格时必须开
 - [ ] Collection / Outliner 组织：一个资产一个 Collection
 - [ ] Linked Duplicate `Alt+D` vs Duplicate `Shift+D` 的数据块共享语义
 - [ ] 实例（Instance）与实例化集合：重复摆放的道具用实例省内存
@@ -193,7 +196,10 @@
 
 **常见坑**
 - ❌ Mirror 的原点不在对称轴上 → 模型撕裂，开 Clipping 能缓解但别依赖
-- ❌ 修改器顺序错：SubD 在 Mirror 之后会在接缝处产生硬边
+- ❌ ~~修改器顺序错：SubD 在 Mirror 之后会在接缝处产生硬边~~ → **因果说反了**。Mirror 先执行（排在 SubD 之上）本身是对的；接缝硬边的第一嫌疑是 **Merge / Merge Distance / Clipping / 法线**，顺序最后才怀疑
+- ❌ 用新 Array 但没开 `Realize Instances` 就接 Boolean / Merge → 完全没反应
+- ❌ 道具原点放几何中心 → 进引擎无法贴地摆放。规则：道具底面正中 / 门铰链 / 角色脚下
+- ❌ 场景文件里 `Ctrl+A → All Transforms` → 所有道具塌到世界原点（只有单资产文件才 Apply Location）
 
 ---
 
@@ -205,18 +211,18 @@
 - [ ] **标记缝合边（Seam）**：`Edit Mode → 2 边模式 → 选边 → Ctrl+E → Mark Seam`
 - [ ] `U → Unwrap` vs `Smart UV Project` vs `Follow Active Quads` 的适用场景
 - [ ] UV 编辑器：缝合选择同步、Pin（`P`）、Pack Islands
-- [ ] **UV 检查三件套**：UV Checker 贴图（拉伸检测）+ Overlap 检测 + 孤岛间距
+- [ ] **UV 检查四件套**：拉伸（内置 UV Grid）+ 重叠（`Select → All by Trait → Overlap`）+ 密度（Average Island Scale）+ 方向/手性（`Select → All by Trait → Winding`）+ 孤岛间距
 - [ ] 纹素密度（Texel Density）一致：同一场景里的物件 UV 密度要统一
-- [ ] 第二套 UV（光照贴图 UV）：做法是把现有 UV 复制一份，重排成不重叠
-- [ ] UVPackmaster（免费版可用，支持 Blender 2.93–5.2）做高效排布
-- [ ] 5.x 的 UV 同步机制（比 4.x 少踩很多坑）
+- [ ] 第二套 UV（光照贴图 UV）：**用 `U → Lightmap Pack` 并勾 `New UV Map`**（一步完成新建+分岛+margin；「复制一份再重排」只在你想让岛形状和主 UV 一致时才用）
+- [ ] UVPackmaster（支持 Blender **2.93–5.2**；现为 UVPackmaster 4，官方主推 **PRO 付费授权**，免费与否需自行核实）做高效排布
+- [ ] 5.x 的 UV 同步机制（**UVerhaul**：同步选择**默认开启**且已修好；老教程让「关掉 UV Sync」在 5.x 别照做）
 
 **练习项目**
 - 给 Stage 1/2 的 4 个道具逐个做 UV
-- 加一张棋盘格贴图，检查每个面格子是否方正
+- 用**内置**棋盘格（`UV 编辑器 → Image → New → Generated Type: UV Grid`，尺寸 = 目标贴图分辨率）检查每个面格子是否方正
 
 **验收标准**
-- 所有 UV 岛无重叠（烘焙光照贴图的前提下）
+- 所有 UV 岛无重叠（**要烘焙的前提下**；不烘焙时重复结构的故意重叠是正确的优化）
 - 棋盘格检查：无明显拉伸（格子基本是正方形）
 - 纹理空间利用率 80%+（用 Pack Islands 后目测）
 - 硬边/倒角边与 UV 缝合边对齐（避免光照接缝）
@@ -224,7 +230,7 @@
 **推荐资源**
 - Blender 官方手册 UV 章节（免费，权威）
 - UVPackmaster 官方文档（免费）
-- TexTools（免费）——**注意：装之前先确认对 Blender 5.2 的兼容性**，老版本可能不支持
+- TexTools（免费）——**注意：原版已停更多年**，目前靠社区 fork `unclepomedev/TexTools-Blender` 维持 5.x 兼容。**装之前确认 fork 的最近提交时间**
 
 **常见坑**
 - ❌ 不标缝合边直接 Unwrap → 得到一个乱七八糟的展开
@@ -237,22 +243,30 @@
 
 **一句话目标**：做出引擎能原样吃进去的 PBR 材质，而不是只有 Blender 里好看的节点。
 
+> 📌 **5.x 订正**：本阶段有 7 条说法需要按 5.x 改——**Blender 没有 Curvature 烘焙类型**、烘焙目标只认「选中 + 激活」的图像节点、`Extrusion` 在不勾 Cage 时叫 `Max Ray Distance`、AO 必须走 `glTF Material Output` 节点组才能进引擎、Metallic/Roughness 要按 B/G 通道打包成 ORM、Principled 现基于 OpenPBR（`Specular` → `Specular › IOR Level`）。开工前先看 `Blender笔记/05-材质PBR与烘焙/笔记.md` 第 0 节，全部知识点在该目录 01–07 篇。
+
 **必学清单**
-- [ ] **Principled BSDF 的每个输入对应什么物理属性**（Base Color / Metallic / Roughness / Normal / AO）
-- [ ] 贴图色彩空间：**Color 贴图 = sRGB，Normal/Roughness/Metallic = Non-Color**（错了整个材质就废）
+- [ ] **Principled BSDF 的每个输入对应什么物理属性**（Base Color / Metallic / Roughness / Normal）
+- [ ] 贴图色彩空间：**Color 贴图 = sRGB，Normal/Roughness/Metallic/AO/ORM = Non-Color**（错了整个材质就废）
 - [ ] Metallic 工作流 vs Specular 工作流（游戏业界默认 Metallic-Roughness）
-- [ ] **烘焙**：高模 → 低模的 Normal / AO / Curvature；Cycles 下 Bake 设置（`Selected to Active`、Extrusion 0.02–0.05）
-- [ ] 5.0 增强的 Multiresolution 烘焙（支持矢量位移、n-gon）
-- [ ] Texture Paint 基础：手绘细节、蒙版
+- [ ] **烘焙**：高模 → 低模的 Normal / AO；Cycles 下 `Render → Bake`（`Selected to Active`、Max Ray Distance 或 Cage Extrusion 从 0.02 起二分试）
+- [ ] **Curvature 没有烘焙类型** → 用 `Emit` + `Geometry → Pointiness` 自己烤
+- [ ] 5.x 烘焙行为：**只烤到「选中且激活」的 Image Texture 节点**；选择顺序 = 先高模、Shift 加选低模（低模为 active）
+- [ ] 5.0 增强的 Multiresolution 烘焙（矢量位移、n-gon、只烤选中图像）
+- [ ] **ORM 打包**：R=AO、G=Roughness、B=Metallic 合成一张，用 `Separate RGB` 接 G→Roughness、B→Metallic
+- [ ] **AO 导出**：接 `glTF Material Output` 节点组的 `Occlusion` 输入（Blender 里看不到效果属正常）
+- [ ] Texture Paint：用烘焙的 Curvature / AO 当蒙版画磨损与积尘
 - [ ] 材质数量控制：**一个材质 = 一次 draw call**，道具尽量 1–2 个材质
 - [ ] 贴图分辨率决策：小道具 512/1024，主角道具 2048，4096 只给 hero 资产
 
 **练习项目**
-- 给工具箱做完整 PBR：Base Color + Roughness + Normal + AO 四张图
+- 给工具箱做完整 PBR：Base Color + Normal + ORM（含 AO）3 张图 + Curvature 中间产物
 - 烘焙一次高模 → 低模的 Normal，验证进引擎后高光正常
 
 **验收标准**
-- 材质只有 Principled BSDF + 贴图，**没有 Blender 专有节点**（Mix Shader 之类引擎不认）
+- 材质只有 Principled BSDF + 贴图，**没有 Blender 专有节点**（Mix Shader / Mix RGB / 程序化纹理引擎都不认）
+- 色彩空间审计通过：只有 Base Color 是 sRGB
+- AO 已接 `glTF Material Output`，引擎里能看到暗角
 - 导入引擎后视觉和 Blender 里基本一致
 - 贴图已保存到磁盘（烘焙完不存会丢！）
 
@@ -266,6 +280,10 @@
 - ❌ Normal 贴图设成 sRGB → 光照全错。**Non-Color，再说一遍**
 - ❌ 烘焙前没 Apply Scale / 没清重叠 UV → 烘焙出一堆黑块
 - ❌ 一个道具 8 个材质 → 引擎里 8 次 draw call，性能直接崩
+- ❌ 没选中目标 Image Texture 节点就点 Bake → **静默失败**（5.x 只烤 selected + active）
+- ❌ 烘焙选择顺序反了（低模先选）→ active 不是低模 → 全错但不报错
+- ❌ 找「Curvature 烘焙类型」→ 没有这个类型，用 `Emit` + `Pointiness`
+- ❌ 用 Mix RGB 把 AO 乘进 Base Color → Blender 好看，导出全丢（要乘就乘进贴图文件）
 
 ---
 
@@ -301,6 +319,8 @@
 
 **一句话目标**：把「做得出来」变成「能进项目」。很多人卡在这一步，前面的功夫全白费。
 
+> 📌 **5.x 订正**：本阶段有 9 处说法需要按 5.x 改或实测（FBX 不必是角色首选、UE 的 100 倍推荐引擎侧解、Draco 还要看量化位数、Blender 的 Faces ≠ Tris、不能用隐藏排除物体、「源文件不 Apply、导出时 Apply」等）。开工前先看 `Blender笔记/07-资产规范与引擎导出/笔记.md` 第 0 节，全部知识点在该目录 01–08 篇。
+
 #### 面数预算参考（三角形数）
 
 | 资产类型 | 移动端 | PC / 主机 | UE5 Nanite |
@@ -311,6 +331,7 @@
 | 主角角色 | 3,000 | 10,000 | 不适用（骨骼） |
 
 > 数值是业界常见参考区间，具体以你项目的性能预算为准。**先做小道具**练手。
+> ⚠️ **数面时要三角化**：Blender 报的 Faces 是四边面数，Quad 模型的真实三角形数约 ×2（编辑模式 `Ctrl+T` 后看 Tris）。引擎里的顶点数还会因硬边 / UV 接缝再放大 1.3–2.0 倍。
 
 #### 导出前检查清单（每个资产都过一遍）
 
@@ -363,13 +384,16 @@ Animation: OFF（静态道具）
 
 **一句话目标**：多个资产组合成一个可信的场景，并把它变成能展示的东西。
 
+> 📌 **5.x 订正**：本阶段有 6 条说法需要按 5.x 改——**`Scatter on Surface` 是独立修改器不是 Array 的子功能**、**`Align Euler to Vector` 已换成 `Align Rotation to Vector`**、**几何节点实例不能与面板 Instancing 混用且嵌套上限 8 层**、**场景性能有三条杠杆（draw call / 剔除粒度 / GPU 实例化）且 glTF 有 `Geometry Nodes Instances` 与 `GPU Instances` 两个开关**、**Cycles 5.0 的 Adaptive Subdivision 转正 + Object Space 让「散布必须用 EEVEE」这条老经验失效**。开工前先看 `Blender笔记/08-场景组装与作品集/笔记.md` 第 0 节，全部知识点在该目录 01–08 篇。
+
 **必学清单**
 - [ ] Asset Browser + 资产库：把做好的道具变成可复用资产（5.2 支持远程资产库托管）
-- [ ] 实例化 vs 复制：大量重复道具用实例
-- [ ] 几何节点入门：散布、随机化旋转缩放、地形散布植被（5.0 新增 Scatter on Surface 也能干一部分）
-- [ ] 空间分组：按区域分组而不是按类型分组（利于视锥剔除）
+- [ ] 场景组装工作流：灰盒 Blockout → 相机定死 → 换资产 → 加细节（**本阶段新增，路线图原先缺这一步**）
+- [ ] 实例化 vs 复制：大量重复道具用实例（**`Alt+D` 只省内存、不省 draw call**）
+- [ ] 几何节点入门：散布、随机化旋转缩放、地形散布植被（5.0 新增 **Scatter on Surface 是独立修改器**，能干一部分）
+- [ ] 空间分组：按区域分组而不是按类型分组（利于视锥剔除；另两条杠杆是 draw call 与 GPU 实例化）
 - [ ] 灯光与出图：三点光、HDRI（Poly Haven）、EEVEE 快速出图、Cycles 出精图
-- [ ] 作品集呈现：转台渲染 + 线框 + UV 检查图 + 面数标注
+- [ ] 作品集呈现：转台渲染 + 线框 + UV 检查图 + 面数标注（**4 张图，不是 3 张**）
 
 **练习项目**
 - **场景 #1：废弃仓库角落**（4–6 个道具 + 灯光 + 一个相机视角的出图）
@@ -378,7 +402,7 @@ Animation: OFF（静态道具）
 **验收标准**
 - 场景里 80% 的道具是你自己做的（少量用免费素材补）
 - 能在引擎里跑起来且帧率正常
-- 输出 3 张图：最终渲染 + 线框 + 贴图/材质展示
+- 输出 4 张图：最终渲染 + 线框 + UV 检查 + 贴图/材质展示
 
 **推荐资源**
 - 付费：GameDev.tv · *Blender Environment Artist*（Grant Abbitt / Rick Davidson，适配 5.1，4.7 分）
@@ -473,7 +497,7 @@ Animation: OFF（静态道具）
 ## 8. 立刻可以做的第一步（今天，1 小时）
 
 1. 装 Blender 5.2.2 LTS（如果还没装）
-2. 打开 `Preferences → Add-ons`，勾上 Node Wrangler / LoopTools / Bool Tool / F2 / Auto Mirror / Extra Objects / Import Images as Planes
+2. 打开 `Preferences → Add-ons`，勾上 Node Wrangler / LoopTools / Bool Tool / F2 / Auto Mirror / Extra Objects（**Import Images as Planes 从 4.2 起已内置，不用勾**）
 3. macOS 开 `Emulate Numpad`；确认视图导航（Orbit/Pan/Zoom）用得顺手
 4. 打开你的 `环切详解.md`，把第 31 节的 **5 种 Loop Cut 用法**逐个实操一遍（约 40 分钟）
 5. 做完把这篇笔记补一句：「已练过，卡点：______」
