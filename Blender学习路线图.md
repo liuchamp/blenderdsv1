@@ -48,7 +48,7 @@
 | UV 编辑器新增算子 | `Arrange/Align Islands`、`Move on Axis`（`Numpad 8246`）、`Pack To → Custom Region`（`Ctrl+B` 设区域） |
 | 新增 6 个**基于几何节点**的修改器：**Array**（重写版）/ **Scatter on Surface** / Instance on Elements / Randomize Instances / Curve to Tube / Geometry Input | 表面散布物体（碎石、植被）不必全靠几何节点；阵列支持 Circle/Curve/随机化。⚠️ 旧 Array 保留为 **Array (Legacy)**，所以 5.2 里有两个 Array |
 | Cycles：Multiresolution 烘焙大幅增强（支持矢量位移、n-gon、只烘焙到选中图像） | 高模→低模烘焙链路更顺 |
-| 几何节点新增 SDF / Volume 节点 | 布尔和有机融合有新解法，但**入门阶段先别碰** |
+| 几何节点新增 **Grid** 节点（SDF / 密度网格） | 布尔和有机融合有新解法，但**入门阶段先别碰**。⚠️ 已订正：Volume 节点（`Volume to Mesh` / `Points to Volume`）从 **2.93** 就有、`Volume Cube` 于 3.2 加入；**5.0 真正新增的是 Grid 体系**（新 `Grid` socket + `Mesh to SDF Grid` / `Grid to Mesh` / `SDF Grid Boolean` 与一批滤波节点），别把两代混成一代。详见 [`Blender笔记/支线/几何节点深入/09-Volume与SDF-Grid体系与订正.md`](Blender笔记/支线/几何节点深入/09-Volume与SDF-Grid体系与订正.md) |
 
 > 老教程依然能看，建模的底层逻辑（拓扑、倒角、挤出）没变。**快捷键和菜单位置有出入时，按 F3 搜命令名**，不用死记。
 
@@ -92,7 +92,7 @@
 
 **总计约 105–144 小时**（不含支线）。
 
-> 支线（按需选）：[**绑定与动画**](Blender笔记/支线/绑定与动画/笔记.md) 6–18h（道具最短路 ≈6–8h / 角色完整路 ≈14–18h） ｜ **几何节点深入** 15–25h ｜ **程序化材质** 10–15h
+> 支线（按需选）：[**绑定与动画**](Blender笔记/支线/绑定与动画/笔记.md) 6–18h（道具最短路 ≈6–8h / 角色完整路 ≈14–18h） ｜ [**几何节点深入**](Blender笔记/支线/几何节点深入/笔记.md) 8–22h（散布路 ≈8–10h / 程序化路 ≈16–22h） ｜ [**程序化材质**](Blender笔记/支线/程序化材质/笔记.md) 6–17h（够用路 ≈6–7h / 完整路 ≈13–17h）
 
 ---
 
@@ -284,6 +284,10 @@
 - ❌ 烘焙选择顺序反了（低模先选）→ active 不是低模 → 全错但不报错
 - ❌ 找「Curvature 烘焙类型」→ 没有这个类型，用 `Emit` + `Pointiness`
 - ❌ 用 Mix RGB 把 AO 乘进 Base Color → Blender 好看，导出全丢（要乘就乘进贴图文件）
+- ❌ 【支线·程序化材质】照老教程找 **Musgrave** → 4.1 起已并入 Noise Texture（5.2 手册里该节点页面已不存在），改用 Noise 的 `Type` 下拉且 `Detail` 要减 1 → 见 [`支线/程序化材质/02`](Blender笔记/支线/程序化材质/02-噪声家族-Noise-Voronoi-Wave-Gabor.md)
+- ❌ 【支线·程序化材质】在 EEVEE 下调试 `Pointiness` / AO 节点 / Bevel 节点 → 手册明确标注 **Cycles Only**，会「看着完全没反应」→ 先切 Cycles（烘焙本来也必须在 Cycles 下）
+- ❌ 【支线·程序化材质】不同尺寸的道具套同一套噪声参数 → 手册规定除 Image 外默认用 **Generated** 坐标（按包围盒归一化），2m 柜子和 0.5m 桶的花纹密度会差 4 倍 → 改用 Object 坐标 + Apply Scale
+- ❌ 【支线·程序化材质】把 Bump 强度照老教程给 1.0 → **4.5 起 Bump/Displacement 的默认距离降到 1mm / 1cm** → 从 0.02–0.1 起调
 
 ---
 
@@ -371,13 +375,14 @@ Animation: OFF（静态道具）
 FBX 导出时至少确认三处：`Add Leaf Bones` **关**、`Only Deform Bones` **开**、`Primary / Secondary Bone Axis` **配**。
 
 > 完整的格式选型对比、两端导出面板逐项说明、引擎验证清单，见支线 [**绑定与动画**](Blender笔记/支线/绑定与动画/笔记.md) 的第 [0 节订正](Blender笔记/支线/绑定与动画/笔记.md#0--先订正路线图里关于这条支线的六条说法要更新) 与 [08-骨骼动画导出-GLB与FBX](Blender笔记/支线/绑定与动画/08-骨骼动画导出-GLB与FBX.md)。
+> **帧率 / 根运动 / Unity 的 glTFast / 外部动画源**这几项见支线的 [10-工程实务补充](Blender笔记/支线/绑定与动画/10-工程实务补充-帧率-根运动-外部动画源.md)（第 0.1 节列出了本轮新核实到的三条事实）。**做动画资产前先把场景 Frame Rate 定在 30**（游戏项目），这一条是「事前改成本最低、事后改成本最高」的设置。
 
 #### 各引擎导入要点
 
 | 引擎 | 单位/轴向 | 要点 |
 | --- | --- | --- |
-| **Godot 4** | 与 Blender 一致（米，Y-up） | GLB 是原生格式，拖进 FileSystem 即可；含多物体时 import mode 选 **Scene** 而非 Mesh，才能还原层级 |
-| **Unity (URP / Unity 6)** | 米，与 Blender 一致 | 原生支持 GLB；颜色发灰去查 `Project Settings → Player → Color Space → Linear`；pbrMetallicRoughness 自动映射 URP Lit |
+| **Godot 4** | 与 Blender 一致（米，Y-up） | GLB 是原生格式，拖进 FileSystem 即可；含多物体时 import mode 选 **Scene** 而非 Mesh，才能还原层级 ⚠️ **导入面板的 FPS（`animation/fps`，默认 **30**）要与 Blender 场景 fps 对齐**，否则曲线会被烘焙成线性点 |
+| **Unity (URP / Unity 6)** | 米，与 Blender 一致 | ⚠️ **已订正**：GLB **不是** Unity 的内置格式——官方文档原话「**Internally, Unity uses the FBX file format as its importing chain**」，内置 `FBXImporter` 的扩展名清单里没有 `.glb` / `.gltf`；GLB 由官方包 **glTFast**（`com.unity.cloud.gltfast`）以 ScriptedImporter 接管，且 glTFast 官方 feature 表注明**动画 clip 导入后不会自动被分配**，要自己建 Animator/Controller。颜色发灰去查 `Project Settings → Player → Color Space → Linear`；pbrMetallicRoughness 需渲染管线是 URP 才会自动映射 |
 | **Unreal Engine 5** | **厘米**（GLB 是米） | 导入时 **Import Uniform Scale = 100**，或在 Blender 里把场景单位设 0.01 再导出；高模静态网格可开 Nanite 免做 LOD |
 | **Bevy** | 米，Y-up | glTF 2.0 是官方推荐格式，用 GLB；材质映射到 `StandardMaterial`，复杂节点会丢——**保持 Principled 纯净** |
 | **Cocos Creator** | 需实测 | 支持 glTF/FBX；轴向与单位建议先拿 1 个测试资产验证再批量做 |
@@ -391,13 +396,15 @@ FBX 导出时至少确认三处：`Add Leaf Bones` **关**、`Only Deform Bones`
 
 **一句话目标**：多个资产组合成一个可信的场景，并把它变成能展示的东西。
 
-> 📌 **5.x 订正**：本阶段有 6 条说法需要按 5.x 改——**`Scatter on Surface` 是独立修改器不是 Array 的子功能**、**`Align Euler to Vector` 已换成 `Align Rotation to Vector`**、**几何节点实例不能与面板 Instancing 混用且嵌套上限 8 层**、**场景性能有三条杠杆（draw call / 剔除粒度 / GPU 实例化）且 glTF 有 `Geometry Nodes Instances` 与 `GPU Instances` 两个开关**、**Cycles 5.0 的 Adaptive Subdivision 转正 + Object Space 让「散布必须用 EEVEE」这条老经验失效**。开工前先看 `Blender笔记/08-场景组装与作品集/笔记.md` 第 0 节，全部知识点在该目录 01–08 篇。
+> 📌 **5.x 订正**：本阶段有 7 条说法需要按 5.x 改——**`Scatter on Surface` 是独立修改器不是 Array 的子功能**、**`Align Euler to Vector` 已换成 `Align Rotation to Vector`**（5.2 手册已把 `Align Euler to Vector` 与 `Rotate Euler` 归入 **Deprecated**）、**几何节点实例不能与面板 Instancing 混用且嵌套上限 8 层**、**场景性能有三条杠杆（draw call / 剔除粒度 / GPU 实例化）且 glTF 有 `Geometry Nodes Instances` 与 `GPU Instances` 两个开关**、**Cycles 5.0 的 Adaptive Subdivision 转正 + Object Space 让「散布必须用 EEVEE」这条老经验失效**、**「5.0 新增 SDF / Volume 节点」不准确（5.0 新增的是 Grid 体系，Volume 节点 2.93 起就有）**。开工前先看 `Blender笔记/08-场景组装与作品集/笔记.md` 第 0 节，全部知识点在该目录 01–08 篇。
+>
+> 📌 **超出 Stage 7 的部分走支线**：[`支线/几何节点深入`](Blender笔记/支线/几何节点深入/笔记.md)（散布路 ≈8–10h / 程序化路 ≈16–22h）——补 Field/Attribute 心智模型、跨几何采样、实例性能、曲线程序化建模、调试手段与导出闭环。触发信号：散布要带筛选条件 / 要程序化造几何 / 节点树看不懂 / 视口卡死。
 
 **必学清单**
 - [ ] Asset Browser + 资产库：把做好的道具变成可复用资产（5.2 支持远程资产库托管）
 - [ ] 场景组装工作流：灰盒 Blockout → 相机定死 → 换资产 → 加细节（**本阶段新增，路线图原先缺这一步**）
 - [ ] 实例化 vs 复制：大量重复道具用实例（**`Alt+D` 只省内存、不省 draw call**）
-- [ ] 几何节点入门：散布、随机化旋转缩放、地形散布植被（5.0 新增 **Scatter on Surface 是独立修改器**，能干一部分）
+- [ ] 几何节点入门：散布、随机化旋转缩放、地形散布植被（5.0 新增 **Scatter on Surface 是独立修改器**，能干一部分）— **超出这些就开支线 [`几何节点深入`](Blender笔记/支线/几何节点深入/笔记.md)**
 - [ ] 空间分组：按区域分组而不是按类型分组（利于视锥剔除；另两条杠杆是 draw call 与 GPU 实例化）
 - [ ] 灯光与出图：三点光、HDRI（Poly Haven）、EEVEE 快速出图、Cycles 出精图
 - [ ] 作品集呈现：转台渲染 + 线框 + UV 检查图 + 面数标注（**4 张图，不是 3 张**）
